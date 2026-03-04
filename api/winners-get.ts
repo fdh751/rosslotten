@@ -1,4 +1,4 @@
-import { list, getDownloadUrl } from "@vercel/blob";
+import { list } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const BLOB_NAME = "rosslotten-winners";
@@ -16,8 +16,18 @@ export default async function handler(
       return;
     }
 
-    const downloadUrl = await getDownloadUrl(blob.url);
-    const response = await fetch(downloadUrl);
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    const response = await fetch(blob.url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Blob fetch failed: ${response.status} ${text}`);
+    }
+
     const data = await response.json();
     res.status(200).json({ data });
   } catch (err) {
