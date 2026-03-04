@@ -1,4 +1,4 @@
-import { list, downloadBlob } from "@vercel/blob";
+import { list, getDownloadUrl } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const BLOB_NAME = "rosslotten-winners";
@@ -16,7 +16,8 @@ export default async function handler(
       return;
     }
 
-    const response = await downloadBlob(blob.url);
+    const downloadUrl = await getDownloadUrl(blob.url);
+    const response = await fetch(downloadUrl);
     const data = await response.json();
     res.status(200).json({ data });
   } catch (err) {
