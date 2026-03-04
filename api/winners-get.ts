@@ -1,4 +1,4 @@
-import { list } from "@vercel/blob";
+import { list, head } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const BLOB_NAME = "rosslotten-winners";
@@ -8,19 +8,22 @@ export default async function handler(
   res: VercelResponse
 ): Promise<void> {
   try {
+    // Find the blob URL via list (pathname match)
     const { blobs } = await list({ prefix: BLOB_NAME });
-    const blob = blobs.find((b) => b.pathname === BLOB_NAME);
+    const listed = blobs.find((b) => b.pathname === BLOB_NAME);
 
-    if (!blob) {
+    if (!listed) {
       res.status(404).json({ data: null });
       return;
     }
 
+    // Use head() to get a guaranteed fresh URL
+    const blob = await head(listed.url);
+
     const token = process.env.BLOB_READ_WRITE_TOKEN;
     const response = await fetch(blob.url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
     });
 
     if (!response.ok) {
