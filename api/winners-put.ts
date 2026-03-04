@@ -34,7 +34,7 @@ export default async function handler(
     JSON.parse(raw);
 
     await put(BLOB_NAME, raw, {
-      access: "public",
+      access: "private",
       contentType: "application/json",
       addRandomSuffix: false,
     });
