@@ -1,7 +1,22 @@
 import { put } from "@vercel/blob";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const BLOB_NAME = "rosslotten-winners";
+
+function readBody(req: VercelRequest): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let data = "";
+    req.on("data", (chunk: Buffer) => { data += chunk.toString(); });
+    req.on("end", () => resolve(data));
+    req.on("error", reject);
+  });
+}
 
 export default async function handler(
   req: VercelRequest,
@@ -13,9 +28,12 @@ export default async function handler(
   }
 
   try {
-    const body = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+    const raw = await readBody(req);
 
-    await put(BLOB_NAME, body, {
+    // Validate it's parseable JSON before storing
+    JSON.parse(raw);
+
+    await put(BLOB_NAME, raw, {
       access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
@@ -23,7 +41,8 @@ export default async function handler(
 
     res.status(200).json({ ok: true });
   } catch (err) {
-    console.error("winners-put error:", err);
-    res.status(500).json({ error: "Failed to save" });
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("winners-put error:", message);
+    res.status(500).json({ error: message });
   }
 }
