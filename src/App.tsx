@@ -345,28 +345,14 @@ function formatDate(iso: string): string {
   }
 }
 
-// ─── Storage helpers ──────────────────────────────────────────────────────────
-
-const STORAGE_KEY = "lottery-published-winners";
-
-// window.storage is injected by the Claude artifact environment.
-// For a real Vercel deployment, replace these three functions with your
-// preferred backend (e.g. Vercel KV, Firebase, or a simple API route).
-declare global {
-  interface Window {
-    storage?: {
-      get: (key: string, shared: boolean) => Promise<{ value: string } | null>;
-      set: (key: string, value: string, shared: boolean) => Promise<unknown>;
-      delete: (key: string, shared: boolean) => Promise<unknown>;
-    };
-  }
-}
+// ─── Storage helpers (Vercel Blob via API routes) ─────────────────────────────
 
 async function loadPublished(): Promise<PublishedData | null> {
   try {
-    if (!window.storage) return null;
-    const r = await window.storage.get(STORAGE_KEY, true);
-    return r ? (JSON.parse(r.value) as PublishedData) : null;
+    const res = await fetch("/api/winners-get");
+    if (!res.ok) return null;
+    const { data } = await res.json();
+    return data as PublishedData | null;
   } catch {
     return null;
   }
@@ -374,9 +360,12 @@ async function loadPublished(): Promise<PublishedData | null> {
 
 async function savePublished(data: PublishedData): Promise<boolean> {
   try {
-    if (!window.storage) return false;
-    await window.storage.set(STORAGE_KEY, JSON.stringify(data), true);
-    return true;
+    const res = await fetch("/api/winners-put", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return res.ok;
   } catch {
     return false;
   }
@@ -384,9 +373,8 @@ async function savePublished(data: PublishedData): Promise<boolean> {
 
 async function clearPublished(): Promise<boolean> {
   try {
-    if (!window.storage) return false;
-    await window.storage.delete(STORAGE_KEY, true);
-    return true;
+    const res = await fetch("/api/winners-delete", { method: "DELETE" });
+    return res.ok;
   } catch {
     return false;
   }
@@ -889,7 +877,7 @@ const App: FC = () => {
   return (
     <>
       <style>{STYLE}</style>
-      <TopNav page={page} hasPublished={!!publishedData} />
+      {page === "admin" && <TopNav page={page} hasPublished={!!publishedData} />}
       {page === "results" ? (
         <PublicPage />
       ) : (
