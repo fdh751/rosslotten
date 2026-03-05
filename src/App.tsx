@@ -574,19 +574,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const [publishing, setPublishing] = useState(false);
   const isPublished = !!publishedData;
 
-  // If results are already published in the store, show them on load
-  useEffect(() => {
-    if (publishedData && !winners) {
-      setWinners(publishedData.winners);
-      const map = new Map<string, Set<number>>();
-      publishedData.winners.forEach((w) => {
-        if (!map.has(w.letter)) map.set(w.letter, new Set());
-        map.get(w.letter)!.add(w.number);
-      });
-      setWinnerSet(map);
-    }
-  }, [publishedData]);
-
   const totalSold = batches.reduce(
     (s, b) => s + getSold(parseUnsold(b.unsoldRaw)).length,
     0
@@ -617,7 +604,12 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const updatePrize = (i: number, val: string) =>
     setPrizes((p) => p.map((x, j) => (j === i ? { label: val } : x)));
 
-  const handleDraw = () => {
+  const handleDraw = async () => {
+    // Clear any previously published results before drawing new ones
+    if (isPublished) {
+      await clearPublished();
+      onClearPublished();
+    }
     const result = drawWinners(batches, drawCount);
     const resultWithPrizes: Winner[] = result.map((w, i) => ({
       ...w,
@@ -791,12 +783,9 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
         <button className="btn-draw" onClick={handleDraw} disabled={totalSold === 0}>
           Draw {drawCount} winner{drawCount !== 1 ? "s" : ""}
         </button>
-        {winners && (
-          <button
-            className="btn btn-ghost"
-            onClick={() => { setWinners(null); setWinnerSet(null); }}
-          >
-            Clear results
+        {isPublished && (
+          <button className="btn btn-ghost" onClick={handleClearPublished}>
+            Unpublish
           </button>
         )}
       </div>
@@ -846,15 +835,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
                 )}
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {isPublished && (
-                  <button
-                    className="btn btn-ghost"
-                    style={{ height: 36, fontSize: "0.8rem" }}
-                    onClick={handleClearPublished}
-                  >
-                    Unpublish
-                  </button>
-                )}
                 <button className="btn-publish" onClick={handlePublish} disabled={publishing}>
                   {publishing ? "Publishing…" : isPublished ? "Re-publish" : "Publish results →"}
                 </button>
