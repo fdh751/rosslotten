@@ -1190,7 +1190,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
 const App: FC = () => {
   const [hash] = useHash();
   const [publishedData, setPublishedData] = useState<PublishedData | null | undefined>(undefined);
-  const [authRequired, setAuthRequired] = useState<boolean | undefined>(undefined);
+  const [authRequired, setAuthRequired] = useState<boolean | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -1219,13 +1219,13 @@ const App: FC = () => {
 
   const page: "admin" | "results" = hash === "#results" ? "results" : "admin";
 
-  // If auth is loading, show nothing
-  if (authRequired === undefined) {
+  // If auth is still loading, show nothing
+  if (authRequired === null) {
     return <style>{STYLE}</style>;
   }
 
-  // If auth is required but user is not authenticated, show login page
-  if (authRequired && !isAuthenticated) {
+  // If trying to access admin and auth is required but not authenticated, show login
+  if (page === "admin" && authRequired && !isAuthenticated) {
     return (
       <>
         <style>{STYLE}</style>
@@ -1237,7 +1237,6 @@ const App: FC = () => {
     );
   }
 
-  // User is authenticated, show the app
   const handleUnpublish = async () => {
     await clearPublished();
     setPublishedData(null);
