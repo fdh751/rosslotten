@@ -20,6 +20,7 @@ interface Winner {
 interface PublishedData {
   winners: Winner[];
   drawnAt: string;
+  winnerIndices?: number[];
 }
 
 interface CheckResult {
@@ -515,20 +516,23 @@ const PublicPage: FC = () => {
       </div>
 
       <div className="public-winners">
-        {data.winners.map((w, i) => (
-          <div
-            className="public-winner-row"
-            key={i}
-            style={{ animationDelay: `${Math.min(i * 0.04, 0.6)}s` }}
-          >
-            <span className="public-pos">{i + 1}.</span>
-            <div className="public-chip">
-              <span className="public-chip-letter">{w.letter}</span>
-              <span className="public-chip-num">{String(w.number).padStart(3, "0")}</span>
+        {data.winners.map((w, i) => {
+          const originalPos = data.winnerIndices?.[i] ?? i;
+          return (
+            <div
+              className="public-winner-row"
+              key={i}
+              style={{ animationDelay: `${Math.min(i * 0.04, 0.6)}s` }}
+            >
+              <span className="public-pos">{originalPos + 1}.</span>
+              <div className="public-chip">
+                <span className="public-chip-letter">{w.letter}</span>
+                <span className="public-chip-num">{String(w.number).padStart(3, "0")}</span>
+              </div>
+              {w.prize && <span className="public-prize">{w.prize}</span>}
             </div>
-            {w.prize && <span className="public-prize">{w.prize}</span>}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="checker-wrap">
@@ -676,15 +680,14 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     setPublishedIndices(newPublishedIndices);
 
     // Build the published winners list in order
-    const publishedWinners = Array.from(newPublishedIndices)
-      .sort((a, b) => a - b)
-      .map((idx) => winners[idx]);
+    const sortedIndices = Array.from(newPublishedIndices).sort((a, b) => a - b);
+    const publishedWinners = sortedIndices.map((idx) => winners[idx]);
 
     if (publishedWinners.length === 0) {
       await clearPublished();
       onClearPublished();
     } else {
-      const payload: PublishedData = { winners: publishedWinners, drawnAt: new Date().toISOString() };
+      const payload: PublishedData = { winners: publishedWinners, drawnAt: new Date().toISOString(), winnerIndices: sortedIndices };
       const ok = await savePublished(payload);
       if (ok) { onPublish(payload); }
     }
