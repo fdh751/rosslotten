@@ -413,7 +413,7 @@ interface TopNavProps {
 
 const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish }) => (
   <nav className="topnav">
-    <span className="topnav-brand">Winner Draw</span>
+    <span className="topnav-brand">Vinnardragning</span>
     <div className="topnav-links" style={{ display: "flex", gap: 4, alignItems: "center" }}>
       <a className={`nav-link${page === "admin" ? " active" : ""}`} href="#admin">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -428,7 +428,7 @@ const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish }) => (
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
           <path d="M1 10L4.5 6.5L7 9L10.5 4.5L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        Results
+        Resultat
         {hasPublished && <span className="nav-badge">Live</span>}
       </a>
       {hasPublished && (
@@ -444,7 +444,7 @@ const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish }) => (
             padding: "6px 14px",
           }}
         >
-          Unpublish
+          Avpublicera
         </button>
       )}
     </div>
@@ -488,7 +488,7 @@ const PublicPage: FC = () => {
       <div className="public-app">
         <div className="empty-public">
           <div className="icon">⏳</div>
-          <h2>Loading…</h2>
+          <h2>Laddar…</h2>
         </div>
       </div>
     );
@@ -499,8 +499,8 @@ const PublicPage: FC = () => {
       <div className="public-app">
         <div className="empty-public">
           <div className="icon">🎫</div>
-          <h2>No results yet</h2>
-          <p>The draw hasn't been published. Check back soon.</p>
+          <h2>Inga resultat ännu</h2>
+          <p>Dragningen har inte publicerats. Kom tillbaka snart.</p>
         </div>
       </div>
     );
@@ -509,10 +509,10 @@ const PublicPage: FC = () => {
   return (
     <div className="public-app">
       <div className="public-header">
-        <div className="header-tag" style={{ margin: "0 auto 20px" }}>Official Results</div>
-        <h1>Winning Tickets</h1>
-        <p>Check below to see if your ticket is a winner.</p>
-        {data.drawnAt && <div className="drawn-at">Draw completed {formatDate(data.drawnAt)}</div>}
+        <div className="header-tag" style={{ margin: "0 auto 20px" }}>Officiella resultat</div>
+        <h1>Vinnande biljetter</h1>
+        <p>Kontrollera nedan för att se om din biljett är en vinnare.</p>
+        {data.drawnAt && <div className="drawn-at">Dragning slutförd {formatDate(data.drawnAt)}</div>}
       </div>
 
       <div className="public-winners">
@@ -537,8 +537,8 @@ const PublicPage: FC = () => {
 
       <div className="checker-wrap">
         <div className="checker-box">
-          <div className="checker-title">Check your ticket</div>
-          <div className="checker-desc">Enter the batch letter and ticket number printed on your ticket.</div>
+          <div className="checker-title">Kontrollera din biljett</div>
+          <div className="checker-desc">Ange batchbokstaven och biljettnummeret tryckt på din biljett.</div>
           <div className="checker-row">
             <input
               className="input-letter"
@@ -566,17 +566,17 @@ const PublicPage: FC = () => {
               }}
               onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && handleCheck()}
             />
-            <button className="btn btn-primary" onClick={handleCheck}>Check</button>
+            <button className="btn btn-primary" onClick={handleCheck}>Kontrollera</button>
           </div>
           {checkResult && (
             <div className={`checker-result ${checkResult.win ? "win" : "no-win"}`}>
               {checkResult.win ? (
                 <>
-                  🎉 <span className="pos-label">Congratulations!</span> Your ticket is winner #{checkResult.position}.
+                  🎉 <span className="pos-label">Grattis!</span> Din biljett är vinnare #{checkResult.position}.
                   {checkResult.prize && <> — <strong>{checkResult.prize}</strong></>}
                 </>
               ) : (
-                <>Your ticket was not drawn this time. Better luck next time!</>
+                <>Din biljett drogs inte denna gång. Lycka till nästa gång!</>
               )}
             </div>
           )}
@@ -629,8 +629,8 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
 
   const handleAdd = useCallback(() => {
     const letter = newLetter.trim().toUpperCase();
-    if (!letter || !/^[A-Z]$/.test(letter)) { setAddError("Enter a single letter A–Z."); return; }
-    if (batches.some((b) => b.letter === letter)) { setAddError(`Batch ${letter} already exists.`); return; }
+    if (!letter || !/^[A-Z]$/.test(letter)) { setAddError("Ange en enda bokstav A–Z."); return; }
+    if (batches.some((b) => b.letter === letter)) { setAddError(`Batch ${letter} finns redan.`); return; }
     setBatches((prev) => [...prev, { letter, unsoldRaw: newUnsold }]);
     setNewLetter(""); setNewUnsold(""); setAddError("");
     setWinners(null); setWinnerSet(null);
@@ -700,11 +700,11 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     <div className="app">
       <header className="header">
         <div className="header-tag">Admin</div>
-        <h1>Winner Draw</h1>
-        <p className="header-desc">Enter each batch's unsold tickets, draw winners, then publish the results for ticket buyers.</p>
+        <h1>Vinnardragning</h1>
+        <p className="header-desc">Ange varje partis osålda biljetter, dra vinnare och publicera sedan resultaten för biljettköpare.</p>
       </header>
 
-      <div className="section-label">Add a batch</div>
+      <div className="section-label">Lägg till en batch</div>
       <div className="add-row">
         <input
           className="input-letter"
@@ -717,7 +717,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
         <input
           className="input-text"
           value={newUnsold}
-          placeholder="Unsold ticket numbers — e.g. 3, 7, 15–20, 45"
+          placeholder="Osålda biljetter — t.ex. 3, 7, 15–20, 45"
           onChange={(e: ChangeEvent<HTMLInputElement>) => setNewUnsold(e.target.value)}
           onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => e.key === "Enter" && handleAdd()}
         />
@@ -725,21 +725,21 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
-          Add Batch
+          Lägg till batch
         </button>
       </div>
       {addError && <div className="error-msg">{addError}</div>}
 
       {batches.length === 0 ? (
-        <div className="no-batches-state">No batches yet — add one above to get started.</div>
+        <div className="no-batches-state">Inga batches ännu — lägg till en ovan för att komma igång.</div>
       ) : (
         <>
           <div className="stats-bar">
             {[
-              { val: batches.length, label: `Batch${batches.length !== 1 ? "es" : ""}` },
-              { val: totalSold, label: "Sold" },
-              { val: totalUnsold, label: "Unsold" },
-              { val: batches.length * 100, label: "Total" },
+              { val: batches.length, label: `Batch${batches.length !== 1 ? "er" : ""}` },
+              { val: totalSold, label: "Såld" },
+              { val: totalUnsold, label: "Osåld" },
+              { val: batches.length * 100, label: "Totalt" },
             ].map((s) => (
               <div className="stat-item" key={s.label}>
                 <div className="stat-val">{s.val}</div>
@@ -759,17 +759,17 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
                     <div className="batch-id">
                       <div className="batch-letter-badge">{b.letter}</div>
                       <div className="batch-meta">
-                        <div><strong>{soldList.length}</strong> sold</div>
-                        <div><strong>{unsoldSet.size}</strong> unsold</div>
+                        <div><strong>{soldList.length}</strong> såld</div>
+                        <div><strong>{unsoldSet.size}</strong> osåld</div>
                       </div>
                     </div>
-                    <button className="btn btn-danger" onClick={() => handleRemove(b.letter)}>Remove</button>
+                    <button className="btn btn-danger" onClick={() => handleRemove(b.letter)}>Ta bort</button>
                   </div>
-                  <span className="unsold-label">Unsold numbers</span>
+                  <span className="unsold-label">Osålda nummer</span>
                   <input
                     className="input-text-sm"
                     value={b.unsoldRaw}
-                    placeholder="e.g. 3, 15–20, 45"
+                    placeholder="t.ex. 3, 15–20, 45"
                     onChange={(e: ChangeEvent<HTMLInputElement>) => handleUnsoldChange(b.letter, e.target.value)}
                   />
                   <div className="ticket-grid">
@@ -796,9 +796,9 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       <div className="divider" />
 
       <div className="section-label">
-        Prizes{" "}
+        Priser{" "}
         <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-3)", fontSize: "0.75rem" }}>
-          — assign a prize description to the top winners (optional)
+          — tilldela en prisbeskrivning till de bästa vinnarna (valfritt)
         </span>
       </div>
       <div className="prizes-section">
@@ -809,7 +809,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
               <input
                 className="input-prize"
                 value={p.label}
-                placeholder={i === 0 ? "1st Prize — Weekend Getaway" : i === 1 ? "2nd Prize — €500 Gift Card" : `Prize #${i + 1}`}
+                placeholder={i === 0 ? "1:a pris — Weekendgiveaway" : i === 1 ? "2:a pris — €500 gavokort" : `Pris #${i + 1}`}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => updatePrize(i, e.target.value)}
               />
               {prizes.length > 1 && (
@@ -822,11 +822,11 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
             <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
           </svg>
-          Add prize tier
+          Lägg till prisnivå
         </button>
       </div>
 
-      <div className="section-label">Draw winners</div>
+      <div className="section-label">Dra vinnare</div>
       <div className="draw-controls">
         <input
           type="number"
@@ -839,22 +839,22 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           }
         />
         <button className="btn-draw" onClick={handleDraw} disabled={totalSold === 0}>
-          Draw {drawCount} winner{drawCount !== 1 ? "s" : ""}
+          Dra {drawCount} vinnare{drawCount !== 1 ? "" : ""}
         </button>
       </div>
 
       {batches.length > 0 && totalSold === 0 && (
-        <p className="hint">All tickets appear unsold — edit each batch to mark which were sold.</p>
+        <p className="hint">Alla biljetter verkar osålda — redigera varje batch för att markera vilka som såldes.</p>
       )}
 
       {winners && winners.length > 0 && (
         <div className="results-wrap">
           <div className="results-header">
             <div className="results-title">
-              Winners <span className="results-badge">{winners.length}</span>
+              Vinnare <span className="results-badge">{winners.length}</span>
             </div>
             <div className="results-actions">
-              <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>Even distribution across batches</span>
+              <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>Jämn fördelning över batches</span>
             </div>
           </div>
           <div className="results-body">
@@ -879,8 +879,8 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
                   <circle cx="8" cy="8" r="6.5" stroke="#16A34A" strokeWidth="1.5" />
                   <path d="M8 5v3.5l2 2" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                Click on each winner row to publish it. Published rows appear highlighted.
-                {publishedIndices.size > 0 && ` (${publishedIndices.size} of ${winners.length} published)`}
+                Klicka på varje vinnarerad för att publicera den. Publicerade rader är markerade i grönt.
+                {publishedIndices.size > 0 && ` (${publishedIndices.size} av ${winners.length} publicerade)`}
               </div>
             </div>
           </div>
@@ -889,7 +889,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
 
       {winners && winners.length === 0 && (
         <p className="hint" style={{ color: "var(--danger)" }}>
-          Not enough sold tickets to fulfil that draw count.
+          Inte tillräckligt många sålda biljetter för att uppfylla det dragantalet.
         </p>
       )}
     </div>
