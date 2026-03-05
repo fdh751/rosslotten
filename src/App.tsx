@@ -572,7 +572,20 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const [winners, setWinners] = useState<Winner[] | null>(null);
   const [winnerSet, setWinnerSet] = useState<Map<string, Set<number>> | null>(null);
   const [publishing, setPublishing] = useState(false);
-  const [justPublished, setJustPublished] = useState(false);
+  const isPublished = !!publishedData;
+
+  // If results are already published in the store, show them on load
+  useEffect(() => {
+    if (publishedData && !winners) {
+      setWinners(publishedData.winners);
+      const map = new Map<string, Set<number>>();
+      publishedData.winners.forEach((w) => {
+        if (!map.has(w.letter)) map.set(w.letter, new Set());
+        map.get(w.letter)!.add(w.number);
+      });
+      setWinnerSet(map);
+    }
+  }, [publishedData]);
 
   const totalSold = batches.reduce(
     (s, b) => s + getSold(parseUnsold(b.unsoldRaw)).length,
@@ -617,7 +630,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       map.get(w.letter)!.add(w.number);
     });
     setWinnerSet(map);
-    setJustPublished(false);
   };
 
   const handlePublish = async () => {
@@ -626,12 +638,11 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     const payload: PublishedData = { winners, drawnAt: new Date().toISOString() };
     const ok = await savePublished(payload);
     setPublishing(false);
-    if (ok) { setJustPublished(true); onPublish(payload); }
+    if (ok) { onPublish(payload); }
   };
 
   const handleClearPublished = async () => {
     await clearPublished();
-    setJustPublished(false);
     onClearPublished();
   };
 
@@ -817,7 +828,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
             ))}
             <div className="publish-banner">
               <div className="publish-banner-text">
-                {justPublished ? (
+                {isPublished ? (
                   <>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M3 8l3.5 3.5L13 4.5" stroke="#16A34A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -835,7 +846,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
                 )}
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {justPublished && publishedData && (
+                {isPublished && (
                   <button
                     className="btn btn-ghost"
                     style={{ height: 36, fontSize: "0.8rem" }}
@@ -845,7 +856,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
                   </button>
                 )}
                 <button className="btn-publish" onClick={handlePublish} disabled={publishing}>
-                  {publishing ? "Publishing…" : justPublished ? "Re-publish" : "Publish results →"}
+                  {publishing ? "Publishing…" : isPublished ? "Re-publish" : "Publish results →"}
                 </button>
               </div>
             </div>
