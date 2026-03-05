@@ -383,10 +383,10 @@ async function clearPublished(): Promise<boolean> {
 // ─── Hash router ──────────────────────────────────────────────────────────────
 
 function useHash(): [string, (h: string) => void] {
-  const [hash, setHash] = useState<string>(() => window.location.hash || "#admin");
+  const [hash, setHash] = useState<string>(() => window.location.hash || "#results");
 
   useEffect(() => {
-    const handler = () => setHash(window.location.hash || "#admin");
+    const handler = () => setHash(window.location.hash || "#results");
     window.addEventListener("hashchange", handler);
     return () => window.removeEventListener("hashchange", handler);
   }, []);
