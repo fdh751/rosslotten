@@ -737,8 +737,8 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           <div className="stats-bar">
             {[
               { val: batches.length, label: `Batch${batches.length !== 1 ? "er" : ""}` },
-              { val: totalSold, label: "Såld" },
-              { val: totalUnsold, label: "Osåld" },
+              { val: totalSold, label: "Sålda" },
+              { val: totalUnsold, label: "Osålda" },
               { val: batches.length * 100, label: "Totalt" },
             ].map((s) => (
               <div className="stat-item" key={s.label}>
@@ -759,13 +759,13 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
                     <div className="batch-id">
                       <div className="batch-letter-badge">{b.letter}</div>
                       <div className="batch-meta">
-                        <div><strong>{soldList.length}</strong> såld</div>
-                        <div><strong>{unsoldSet.size}</strong> osåld</div>
+                        <div><strong>{soldList.length}</strong> sålda</div>
+                        <div><strong>{unsoldSet.size}</strong> osålda</div>
                       </div>
                     </div>
                     <button className="btn btn-danger" onClick={() => handleRemove(b.letter)}>Ta bort</button>
                   </div>
-                  <span className="unsold-label">Osålda nummer</span>
+                  <span className="unsold-label">Osålda lotter</span>
                   <input
                     className="input-text-sm"
                     value={b.unsoldRaw}
