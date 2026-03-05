@@ -615,6 +615,9 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
         if (idx >= 0) indices.add(idx);
       });
       setPublishedIndices(indices);
+    } else if (!publishedData) {
+      // Clear published indices when all winners are unpublished
+      setPublishedIndices(new Set());
     }
   }, [publishedData, winners]);
 
