@@ -403,12 +403,13 @@ function useHash(): [string, (h: string) => void] {
 interface TopNavProps {
   page: "admin" | "results";
   hasPublished: boolean;
+  onUnpublish?: () => void;
 }
 
-const TopNav: FC<TopNavProps> = ({ page, hasPublished }) => (
+const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish }) => (
   <nav className="topnav">
     <span className="topnav-brand">Winner Draw</span>
-    <div className="topnav-links">
+    <div className="topnav-links" style={{ display: "flex", gap: 4, alignItems: "center" }}>
       <a className={`nav-link${page === "admin" ? " active" : ""}`} href="#admin">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
           <rect x="1" y="1" width="5" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
@@ -425,6 +426,22 @@ const TopNav: FC<TopNavProps> = ({ page, hasPublished }) => (
         Results
         {hasPublished && <span className="nav-badge">Live</span>}
       </a>
+      {hasPublished && (
+        <button
+          className="nav-link"
+          onClick={onUnpublish}
+          style={{
+            background: "transparent",
+            border: "1.5px solid var(--border)",
+            color: "var(--text-3)",
+            cursor: "pointer",
+            fontSize: "0.82rem",
+            padding: "6px 14px",
+          }}
+        >
+          Unpublish
+        </button>
+      )}
     </div>
   </nav>
 );
@@ -633,11 +650,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     if (ok) { onPublish(payload); }
   };
 
-  const handleClearPublished = async () => {
-    await clearPublished();
-    onClearPublished();
-  };
-
   return (
     <div className="app">
       <header className="header">
@@ -783,11 +795,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
         <button className="btn-draw" onClick={handleDraw} disabled={totalSold === 0}>
           Draw {drawCount} winner{drawCount !== 1 ? "s" : ""}
         </button>
-        {isPublished && (
-          <button className="btn btn-ghost" onClick={handleClearPublished}>
-            Unpublish
-          </button>
-        )}
       </div>
 
       {batches.length > 0 && totalSold === 0 && (
@@ -865,10 +872,15 @@ const App: FC = () => {
 
   const page: "admin" | "results" = hash === "#results" ? "results" : "admin";
 
+  const handleUnpublish = async () => {
+    await clearPublished();
+    setPublishedData(null);
+  };
+
   return (
     <>
       <style>{STYLE}</style>
-      {page === "admin" && <TopNav page={page} hasPublished={!!publishedData} />}
+      {page === "admin" && <TopNav page={page} hasPublished={!!publishedData} onUnpublish={handleUnpublish} />}
       {page === "results" ? (
         <PublicPage />
       ) : (
