@@ -460,6 +460,13 @@ const PublicPage: FC = () => {
 
   useEffect(() => {
     loadPublished().then(setData);
+    
+    // Poll for updates every 2 seconds
+    const interval = setInterval(() => {
+      loadPublished().then(setData);
+    }, 2000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleCheck = () => {
