@@ -67,7 +67,7 @@ const STYLE = `
     -webkit-font-smoothing: antialiased;
   }
 
-  .app { max-width: 1000px; margin: 0 auto; padding: 48px 24px 96px; }
+  .app { width: 100%; max-width: 1000px; margin: 0 auto; padding: 48px 24px 96px; }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
