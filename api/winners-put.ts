@@ -1,22 +1,7 @@
-import { put } from "@vercel/blob";
+import { redis } from "@vercel/redis";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-const BLOB_NAME = "rosslotten-winners";
-
-function readBody(req: VercelRequest): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let data = "";
-    req.on("data", (chunk: Buffer) => { data += chunk.toString(); });
-    req.on("end", () => resolve(data));
-    req.on("error", reject);
-  });
-}
+const REDIS_KEY = "rosslotten-winners";
 
 export default async function handler(
   req: VercelRequest,
@@ -28,17 +13,15 @@ export default async function handler(
   }
 
   try {
-    const raw = await readBody(req);
+    const data = req.body;
 
-    // Validate it's parseable JSON before storing
-    JSON.parse(raw);
+    // Validate it's proper JSON
+    if (typeof data !== "object" || !data.winners || !Array.isArray(data.winners)) {
+      res.status(400).json({ error: "Invalid data format" });
+      return;
+    }
 
-    await put(BLOB_NAME, raw, {
-      access: "private",
-      contentType: "application/json",
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    });
+    await redis.set(REDIS_KEY, JSON.stringify(data));
 
     res.status(200).json({ ok: true });
   } catch (err) {

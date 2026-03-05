@@ -1,37 +1,20 @@
-import { list, head } from "@vercel/blob";
+import { redis } from "@vercel/redis";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const BLOB_NAME = "rosslotten-winners";
+const REDIS_KEY = "rosslotten-winners";
 
 export default async function handler(
   _req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
   try {
-    // Find the blob URL via list (pathname match)
-    const { blobs } = await list({ prefix: BLOB_NAME });
-    const listed = blobs.find((b) => b.pathname === BLOB_NAME);
+    const data = await redis.get(REDIS_KEY);
 
-    if (!listed) {
+    if (!data) {
       res.status(404).json({ data: null });
       return;
     }
 
-    // Use head() to get a guaranteed fresh URL
-    const blob = await head(listed.url);
-
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    const response = await fetch(blob.url, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Blob fetch failed: ${response.status} ${text}`);
-    }
-
-    const data = await response.json();
     res.status(200).json({ data });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
