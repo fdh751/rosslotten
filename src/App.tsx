@@ -794,7 +794,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
         {winners && (
           <button
             className="btn btn-ghost"
-            onClick={() => { setWinners(null); setWinnerSet(null); setJustPublished(false); }}
+            onClick={() => { setWinners(null); setWinnerSet(null); }}
           >
             Clear results
           </button>
