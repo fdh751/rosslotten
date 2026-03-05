@@ -226,6 +226,10 @@ const STYLE = `
   .winner-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1.5px solid var(--border); animation: chipIn 0.25s ease both; }
   .winner-row:last-child { border-bottom: none; padding-bottom: 0; }
   .winner-row:first-child { padding-top: 0; }
+  .winner-row.published { background: var(--success-light); padding: 10px 12px; margin: 0 -12px; border-radius: 6px; border: 1.5px solid var(--success-mid); border-bottom: 1.5px solid var(--success-mid); cursor: pointer; transition: all 0.15s; }
+  .winner-row.published:hover { background: var(--success-light); opacity: 0.8; }
+  .winner-row:not(.published) { cursor: pointer; transition: background 0.15s; }
+  .winner-row:not(.published):hover { background: var(--surface-2); padding: 10px 12px; margin: 0 -12px; border-radius: 6px; }
   .winner-position { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--text-3); width: 28px; flex-shrink: 0; text-align: right; }
   .winner-chip-inline { display: flex; border-radius: 7px; overflow: hidden; border: 1.5px solid var(--accent-mid); font-family: 'DM Mono', monospace; flex-shrink: 0; }
   .chip-letter { background: var(--accent); color: #fff; font-size: 0.8rem; font-weight: 500; padding: 5px 9px; }
@@ -588,8 +592,20 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const [prizes, setPrizes] = useState<Prize[]>([{ label: "" }]);
   const [winners, setWinners] = useState<Winner[] | null>(null);
   const [winnerSet, setWinnerSet] = useState<Map<string, Set<number>> | null>(null);
-  const [publishing, setPublishing] = useState(false);
+  const [publishedIndices, setPublishedIndices] = useState<Set<number>>(new Set());
   const isPublished = !!publishedData;
+
+  // Determine published indices from publishedData
+  useEffect(() => {
+    if (publishedData && winners) {
+      const indices = new Set<number>();
+      publishedData.winners.forEach((pubWinner) => {
+        const idx = winners.findIndex((w) => w.letter === pubWinner.letter && w.number === pubWinner.number);
+        if (idx >= 0) indices.add(idx);
+      });
+      setPublishedIndices(indices);
+    }
+  }, [publishedData, winners]);
 
   const totalSold = batches.reduce(
     (s, b) => s + getSold(parseUnsold(b.unsoldRaw)).length,
@@ -633,6 +649,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       prize: prizes[i]?.label?.trim() || null,
     }));
     setWinners(resultWithPrizes);
+    setPublishedIndices(new Set());
     const map = new Map<string, Set<number>>();
     result.forEach((w) => {
       if (!map.has(w.letter)) map.set(w.letter, new Set());
@@ -641,13 +658,29 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     setWinnerSet(map);
   };
 
-  const handlePublish = async () => {
+  const handlePublishRow = async (index: number) => {
     if (!winners) return;
-    setPublishing(true);
-    const payload: PublishedData = { winners, drawnAt: new Date().toISOString() };
-    const ok = await savePublished(payload);
-    setPublishing(false);
-    if (ok) { onPublish(payload); }
+    const newPublishedIndices = new Set(publishedIndices);
+    if (newPublishedIndices.has(index)) {
+      newPublishedIndices.delete(index);
+    } else {
+      newPublishedIndices.add(index);
+    }
+    setPublishedIndices(newPublishedIndices);
+
+    // Build the published winners list in order
+    const publishedWinners = Array.from(newPublishedIndices)
+      .sort((a, b) => a - b)
+      .map((idx) => winners[idx]);
+
+    if (publishedWinners.length === 0) {
+      await clearPublished();
+      onClearPublished();
+    } else {
+      const payload: PublishedData = { winners: publishedWinners, drawnAt: new Date().toISOString() };
+      const ok = await savePublished(payload);
+      if (ok) { onPublish(payload); }
+    }
   };
 
   return (
@@ -813,7 +846,12 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           </div>
           <div className="results-body">
             {winners.map((w, i) => (
-              <div className="winner-row" key={i} style={{ animationDelay: `${Math.min(i * 0.03, 0.5)}s` }}>
+              <div
+                className={`winner-row ${publishedIndices.has(i) ? "published" : ""}`}
+                key={i}
+                onClick={() => handlePublishRow(i)}
+                style={{ animationDelay: `${Math.min(i * 0.03, 0.5)}s` }}
+              >
                 <span className="winner-position">{i + 1}.</span>
                 <div className="winner-chip-inline">
                   <span className="chip-letter">{w.letter}</span>
@@ -824,27 +862,12 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
             ))}
             <div className="publish-banner">
               <div className="publish-banner-text">
-                {isPublished ? (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M3 8l3.5 3.5L13 4.5" stroke="#16A34A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Results are live on the Results page. Ticket buyers can check their numbers now.
-                  </>
-                ) : (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <circle cx="8" cy="8" r="6.5" stroke="#16A34A" strokeWidth="1.5" />
-                      <path d="M8 5v3.5l2 2" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                    Ready to share? Publish these results so ticket buyers can verify their tickets.
-                  </>
-                )}
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <button className="btn-publish" onClick={handlePublish} disabled={publishing}>
-                  {publishing ? "Publishing…" : isPublished ? "Re-publish" : "Publish results →"}
-                </button>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="6.5" stroke="#16A34A" strokeWidth="1.5" />
+                  <path d="M8 5v3.5l2 2" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                Click on each winner row to publish it. Published rows appear highlighted.
+                {publishedIndices.size > 0 && ` (${publishedIndices.size} of ${winners.length} published)`}
               </div>
             </div>
           </div>
