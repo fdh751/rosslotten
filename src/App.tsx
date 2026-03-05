@@ -113,7 +113,7 @@ const STYLE = `
   }
   .header-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
   .header h1 {
-    font-family: 'Syne', sans-serif; font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 800;
+    font-family: 'DM Sans', sans-serif; font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 800;
     color: var(--text); line-height: 1.05; letter-spacing: -0.03em;
   }
   .header-desc { margin-top: 10px; color: var(--text-2); font-size: 1rem; font-weight: 300; max-width: 480px; }
