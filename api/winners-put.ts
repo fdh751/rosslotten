@@ -37,6 +37,7 @@ export default async function handler(
       access: "private",
       contentType: "application/json",
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
 
     res.status(200).json({ ok: true });
