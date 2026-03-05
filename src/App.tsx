@@ -22,7 +22,7 @@ interface PublishedData {
   drawnAt: string;
   winnerIndices?: number[];
 }
-unpublish
+
 interface CheckResult {
   win: boolean;
   position?: number;
