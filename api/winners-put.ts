@@ -1,4 +1,4 @@
-import { redis } from "@vercel/redis";
+import { createClient } from "redis";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const REDIS_KEY = "rosslotten-winners";
@@ -12,7 +12,10 @@ export default async function handler(
     return;
   }
 
+  const client = createClient();
+
   try {
+    await client.connect();
     const data = req.body;
 
     // Validate it's proper JSON
@@ -21,12 +24,14 @@ export default async function handler(
       return;
     }
 
-    await redis.set(REDIS_KEY, JSON.stringify(data));
+    await client.set(REDIS_KEY, JSON.stringify(data));
 
     res.status(200).json({ ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("winners-put error:", message);
     res.status(500).json({ error: message });
+  } finally {
+    await client.quit();
   }
 }
