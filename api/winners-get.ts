@@ -7,7 +7,9 @@ export default async function handler(
   _req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
-  const client = createClient();
+  const client = createClient({
+    url: process.env.REDIS_URL,
+  });
 
   try {
     await client.connect();

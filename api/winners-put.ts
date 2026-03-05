@@ -12,7 +12,9 @@ export default async function handler(
     return;
   }
 
-  const client = createClient();
+  const client = createClient({
+    url: process.env.REDIS_URL,
+  });
 
   try {
     await client.connect();
