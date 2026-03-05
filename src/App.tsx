@@ -413,7 +413,7 @@ interface TopNavProps {
 
 const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish }) => (
   <nav className="topnav">
-    <span className="topnav-brand">Vinnardragning</span>
+    <span className="topnav-brand">RossLotten</span>
     <div className="topnav-links" style={{ display: "flex", gap: 4, alignItems: "center" }}>
       <a className={`nav-link${page === "admin" ? " active" : ""}`} href="#admin">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -700,11 +700,11 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     <div className="app">
       <header className="header">
         <div className="header-tag">Admin</div>
-        <h1>Vinnardragning</h1>
-        <p className="header-desc">Ange varje partis osålda biljetter, dra vinnare och publicera sedan resultaten för biljettköpare.</p>
+        <h1>RossLotten</h1>
+        <p className="header-desc">Ange varje rings osålda lotter, dra vinnare och publicera sedan resultaten.</p>
       </header>
 
-      <div className="section-label">Lägg till en batch</div>
+      <div className="section-label">Lägg till en ring</div>
       <div className="add-row">
         <input
           className="input-letter"
@@ -725,13 +725,13 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
-          Lägg till batch
+          Lägg till ring
         </button>
       </div>
       {addError && <div className="error-msg">{addError}</div>}
 
       {batches.length === 0 ? (
-        <div className="no-batches-state">Inga batches ännu — lägg till en ovan för att komma igång.</div>
+        <div className="no-batches-state">Inga ringar ännu — lägg till en ovan för att komma igång.</div>
       ) : (
         <>
           <div className="stats-bar">
@@ -798,7 +798,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       <div className="section-label">
         Priser{" "}
         <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-3)", fontSize: "0.75rem" }}>
-          — tilldela en prisbeskrivning till de bästa vinnarna (valfritt)
+          — lägg till en prisbeskrivning (valfritt)
         </span>
       </div>
       <div className="prizes-section">
@@ -822,7 +822,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
             <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
           </svg>
-          Lägg till prisnivå
+          Lägg till beskrivning
         </button>
       </div>
 
@@ -844,7 +844,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       </div>
 
       {batches.length > 0 && totalSold === 0 && (
-        <p className="hint">Alla biljetter verkar osålda — redigera varje batch för att markera vilka som såldes.</p>
+        <p className="hint">Alla lotter verkar osålda — redigera varje ring för att markera vilka som sålts.</p>
       )}
 
       {winners && winners.length > 0 && (
@@ -854,7 +854,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
               Vinnare <span className="results-badge">{winners.length}</span>
             </div>
             <div className="results-actions">
-              <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>Jämn fördelning över batches</span>
+              <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>Jämn fördelning över ringarna</span>
             </div>
           </div>
           <div className="results-body">
