@@ -88,7 +88,7 @@ const STYLE = `
     padding: 14px 24px; border-bottom: 1.5px solid var(--border);
     background: var(--surface); position: sticky; top: 0; z-index: 100;
   }
-  .topnav-brand { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+  .topnav-brand { font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
   .topnav-links { display: flex; gap: 4px; }
   .nav-link {
     font-size: 0.82rem; font-weight: 500; color: var(--text-2); background: transparent;
