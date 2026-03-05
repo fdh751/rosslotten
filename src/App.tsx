@@ -278,6 +278,43 @@ const STYLE = `
   .empty-public .icon { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.4; }
   .empty-public h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text-2); margin-bottom: 8px; }
   .empty-public p { font-size: 0.9rem; }
+
+  /* LOGIN PAGE */
+  .login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; background: var(--bg); }
+  .login-box { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 40px; max-width: 400px; width: 100%; animation: fadeUp 0.3s ease; }
+  .login-box h1 { font-family: 'DM Sans', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--text); margin-bottom: 10px; letter-spacing: -0.02em; }
+  .login-box p { color: var(--text-2); font-size: 0.9rem; margin-bottom: 30px; }
+  .login-field { margin-bottom: 20px; }
+  .login-field label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+  .login-field input { width: 100%; height: 44px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; padding: 0 14px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+  .login-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .login-field input::placeholder { color: var(--text-3); }
+  .login-error { color: var(--danger); font-size: 0.8rem; margin-top: 6px; }
+  .login-btn { width: 100%; height: 44px; background: var(--text); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
+  .login-btn:hover { background: #2a2a28; transform: translateY(-1px); }
+  .login-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* SETTINGS MODAL */
+  .settings-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 24px; animation: fadeUp 0.2s ease; }
+  .settings-modal { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 32px; max-width: 450px; width: 100%; animation: fadeUp 0.25s ease; }
+  .settings-modal h2 { font-family: 'DM Sans', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text); margin-bottom: 24px; }
+  .settings-field { margin-bottom: 20px; }
+  .settings-field label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+  .settings-field input { width: 100%; height: 44px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; padding: 0 14px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+  .settings-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .settings-field input::placeholder { color: var(--text-3); }
+  .settings-error { color: var(--danger); font-size: 0.8rem; margin-top: 6px; }
+  .settings-success { color: var(--success); font-size: 0.8rem; margin-top: 6px; }
+  .settings-actions { display: flex; gap: 12px; margin-top: 28px; }
+  .settings-btn { flex: 1; height: 44px; background: var(--text); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
+  .settings-btn:hover { background: #2a2a28; transform: translateY(-1px); }
+  .settings-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .settings-btn-cancel { background: transparent; color: var(--text-2); border: 1.5px solid var(--border); }
+  .settings-btn-cancel:hover { border-color: var(--border-strong); color: var(--text); background: var(--surface-2); }
+
+  /* TOPNAV SETTINGS BUTTON */
+  .btn-settings { background: transparent; color: var(--text-2); border: 1.5px solid var(--border); padding: 6px 14px; height: 32px; font-size: 0.75rem; font-family: 'DM Sans', sans-serif; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+  .btn-settings:hover { border-color: var(--border-strong); color: var(--text); }
 `;
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -385,6 +422,54 @@ async function clearPublished(): Promise<boolean> {
   }
 }
 
+// ─── Authentication helpers ───────────────────────────────────────────────────
+
+async function checkAuthRequired(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/auth-check");
+    if (!res.ok) return false;
+    const { requiresAuth } = await res.json();
+    return requiresAuth;
+  } catch {
+    return false;
+  }
+}
+
+async function loginWithCredentials(
+  username: string,
+  password: string
+): Promise<string | null> {
+  try {
+    const res = await fetch("/api/auth-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!res.ok) return null;
+    const { sessionToken } = await res.json();
+    return sessionToken;
+  } catch {
+    return null;
+  }
+}
+
+async function setCredentials(
+  username: string,
+  password: string,
+  currentPassword?: string
+): Promise<boolean> {
+  try {
+    const res = await fetch("/api/auth-set", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password, currentPassword }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 // ─── Hash router ──────────────────────────────────────────────────────────────
 
 function useHash(): [string, (h: string) => void] {
@@ -403,17 +488,212 @@ function useHash(): [string, (h: string) => void] {
   return [hash, navigate];
 }
 
+// ─── Login Page ───────────────────────────────────────────────────────────────
+
+interface LoginPageProps {
+  onLoginSuccess: () => void;
+  isLoading?: boolean;
+}
+
+const LoginPage: FC<LoginPageProps> = ({ onLoginSuccess, isLoading }) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!username || !password) {
+      setError("Användarnamn och lösenord är obligatoriska.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    const token = await loginWithCredentials(username, password);
+    if (token) {
+      localStorage.setItem("rosslotten-auth-token", token);
+      onLoginSuccess();
+    } else {
+      setError("Ogiltiga autentiseringsuppgifter.");
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <div className="login-page">
+      <div className="login-box">
+        <h1>Inloggning</h1>
+        <p>Ange dina autentiseringsuppgifter för att få åtkomst till admin-panelen.</p>
+        <div className="login-field">
+          <label>Användarnamn</label>
+          <input
+            type="text"
+            placeholder="Användarnamn"
+            value={username}
+            onChange={(e) => { setUsername(e.target.value); setError(""); }}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            disabled={loading}
+          />
+        </div>
+        <div className="login-field">
+          <label>Lösenord</label>
+          <input
+            type="password"
+            placeholder="Lösenord"
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); setError(""); }}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            disabled={loading}
+          />
+        </div>
+        {error && <div className="login-error">{error}</div>}
+        <button className="login-btn" onClick={handleLogin} disabled={loading || isLoading}>
+          {loading ? "Loggar in..." : "Logga in"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── Settings Modal ────────────────────────────────────────────────────────────
+
+interface SettingsModalProps {
+  onClose: () => void;
+  requiresCurrentPassword: boolean;
+}
+
+const SettingsModal: FC<SettingsModalProps> = ({ onClose, requiresCurrentPassword }) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    setError("");
+    setSuccess("");
+
+    if (!username || !password) {
+      setError("Användarnamn och lösenord är obligatoriska.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Lösenorden matchar inte.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Lösenordet måste vara minst 6 tecken långt.");
+      return;
+    }
+
+    if (requiresCurrentPassword && !currentPassword) {
+      setError("Du måste ange ditt nuvarande lösenord.");
+      return;
+    }
+
+    setLoading(true);
+
+    const ok = await setCredentials(
+      username,
+      password,
+      requiresCurrentPassword ? currentPassword : undefined
+    );
+
+    if (ok) {
+      setSuccess("Autentiseringsuppgifterna uppdaterades.");
+      setTimeout(onClose, 1500);
+    } else {
+      setError(requiresCurrentPassword ? "Nuvarande lösenord är felaktig." : "Misslyckades uppdatera autentiseringsuppgifterna.");
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <div className="settings-overlay" onClick={onClose}>
+      <div className="settings-modal" onClick={(e) => e.stopPropagation()}>
+        <h2>Autentiseringsuppgifter</h2>
+
+        {requiresCurrentPassword && (
+          <div className="settings-field">
+            <label>Nuvarande lösenord</label>
+            <input
+              type="password"
+              placeholder="Nuvarande lösenord"
+              value={currentPassword}
+              onChange={(e) => { setCurrentPassword(e.target.value); setError(""); }}
+              disabled={loading}
+            />
+          </div>
+        )}
+
+        <div className="settings-field">
+          <label>Nytt användarnamn</label>
+          <input
+            type="text"
+            placeholder="Nytt användarnamn"
+            value={username}
+            onChange={(e) => { setUsername(e.target.value); setError(""); }}
+            disabled={loading}
+          />
+        </div>
+
+        <div className="settings-field">
+          <label>Nytt lösenord</label>
+          <input
+            type="password"
+            placeholder="Nytt lösenord"
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); setError(""); }}
+            disabled={loading}
+          />
+        </div>
+
+        <div className="settings-field">
+          <label>Bekräfta lösenord</label>
+          <input
+            type="password"
+            placeholder="Bekräfta lösenord"
+            value={confirmPassword}
+            onChange={(e) => { setConfirmPassword(e.target.value); setError(""); }}
+            disabled={loading}
+          />
+        </div>
+
+        {error && <div className="settings-error">{error}</div>}
+        {success && <div className="settings-success">{success}</div>}
+
+        <div className="settings-actions">
+          <button className="settings-btn settings-btn-cancel" onClick={onClose} disabled={loading}>
+            Avbryt
+          </button>
+          <button className="settings-btn" onClick={handleSave} disabled={loading}>
+            {loading ? "Sparar..." : "Spara"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── TopNav ───────────────────────────────────────────────────────────────────
 
 interface TopNavProps {
   page: "admin" | "results";
   hasPublished: boolean;
   onUnpublish?: () => void;
+  onSettings?: () => void;
 }
 
-const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish }) => (
+const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish, onSettings }) => (
   <nav className="topnav">
-    <span className="topnav-brand">RossLotten</span>
+    <span className="topnav-brand">Vinnardragning</span>
     <div className="topnav-links" style={{ display: "flex", gap: 4, alignItems: "center" }}>
       <a className={`nav-link${page === "admin" ? " active" : ""}`} href="#admin">
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -431,6 +711,15 @@ const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish }) => (
         Resultat
         {hasPublished && <span className="nav-badge">Live</span>}
       </a>
+      {onSettings && (
+        <button
+          className="btn-settings"
+          onClick={onSettings}
+          title="Autentiseringsuppgifter"
+        >
+          Inställningar
+        </button>
+      )}
       {hasPublished && (
         <button
           className="nav-link"
@@ -901,13 +1190,54 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
 const App: FC = () => {
   const [hash] = useHash();
   const [publishedData, setPublishedData] = useState<PublishedData | null | undefined>(undefined);
+  const [authRequired, setAuthRequired] = useState<boolean | undefined>(undefined);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
+    // Check if auth is required and if user is already logged in
+    const checkAuth = async () => {
+      const required = await checkAuthRequired();
+      setAuthRequired(required);
+      
+      if (required) {
+        // Check if user has a valid session token
+        const token = localStorage.getItem("rosslotten-auth-token");
+        if (token) {
+          // Assume token is valid if it exists (in production, you'd validate it)
+          setIsAuthenticated(true);
+        }
+      } else {
+        // No auth required, user is automatically "authenticated"
+        setIsAuthenticated(true);
+      }
+    };
+
+    checkAuth();
     loadPublished().then(setPublishedData);
   }, []);
 
   const page: "admin" | "results" = hash === "#results" ? "results" : "admin";
 
+  // If auth is loading, show nothing
+  if (authRequired === undefined) {
+    return <style>{STYLE}</style>;
+  }
+
+  // If auth is required but user is not authenticated, show login page
+  if (authRequired && !isAuthenticated) {
+    return (
+      <>
+        <style>{STYLE}</style>
+        <LoginPage
+          onLoginSuccess={() => setIsAuthenticated(true)}
+          isLoading={false}
+        />
+      </>
+    );
+  }
+
+  // User is authenticated, show the app
   const handleUnpublish = async () => {
     await clearPublished();
     setPublishedData(null);
@@ -916,7 +1246,14 @@ const App: FC = () => {
   return (
     <>
       <style>{STYLE}</style>
-      {page === "admin" && <TopNav page={page} hasPublished={!!publishedData} onUnpublish={handleUnpublish} />}
+      {page === "admin" && (
+        <TopNav 
+          page={page} 
+          hasPublished={!!publishedData} 
+          onUnpublish={handleUnpublish}
+          onSettings={() => setShowSettings(true)}
+        />
+      )}
       {page === "results" ? (
         <PublicPage />
       ) : (
@@ -924,6 +1261,12 @@ const App: FC = () => {
           publishedData={publishedData}
           onPublish={(d) => setPublishedData(d)}
           onClearPublished={() => setPublishedData(null)}
+        />
+      )}
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          requiresCurrentPassword={authRequired}
         />
       )}
     </>
