@@ -210,14 +210,14 @@ const STYLE = `
   .results-title { font-weight: 600; font-size: 0.92rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
   .results-badge { background: var(--accent); color: #fff; font-size: 0.72rem; font-weight: 600; border-radius: 100px; padding: 3px 10px; font-family: 'DM Mono', monospace; }
   .results-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .results-body { padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .results-body { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
 
   /* WINNER ROWS */
-  .winner-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); animation: chipIn 0.25s ease both; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .winner-row { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--radius-sm); animation: chipIn 0.25s ease both; cursor: pointer; transition: all 0.15s; }
   .winner-row:hover { background: var(--surface-3); border-color: var(--border-strong); }
   .winner-row.published { background: var(--success-light); border: 1.5px solid var(--success-mid); }
   .winner-row.published:hover { background: var(--success-light); opacity: 0.85; }
-  .winner-position { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text-3); font-weight: 600; }
+  .winner-position { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text-3); font-weight: 600; width: 32px; flex-shrink: 0; text-align: right; }
   .winner-chip-inline { display: flex; border-radius: 7px; overflow: hidden; border: 1.5px solid var(--accent-mid); font-family: 'DM Mono', monospace; flex-shrink: 0; }
   .chip-letter { background: var(--accent); color: #fff; font-size: 0.8rem; font-weight: 500; padding: 5px 9px; }
   .chip-num { background: var(--accent-light); color: var(--accent); font-size: 0.8rem; font-weight: 500; padding: 5px 10px; }
