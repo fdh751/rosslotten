@@ -236,7 +236,7 @@ const STYLE = `
   /* PUBLIC RESULTS PAGE */
   .public-app { width: 100%; max-width: 1200px; margin: 0 auto; padding: 64px 32px 96px; }
   .public-header { text-align: center; margin-bottom: 40px; }
-  .public-header h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; color: var(--text); letter-spacing: -0.03em; margin-bottom: 10px; }
+  .public-header h1 { font-family: 'DM Sans', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; color: var(--text); letter-spacing: -0.03em; margin-bottom: 10px; }
   .public-header p { color: var(--text-2); font-size: 0.95rem; font-weight: 300; }
   .drawn-at { font-size: 0.75rem; color: var(--text-3); margin-top: 6px; font-family: 'DM Mono', monospace; }
 
@@ -459,6 +459,42 @@ async function saveBatches(batches: Batch[]): Promise<boolean> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(batches),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function loadDrawnWinners(): Promise<Winner[]> {
+  try {
+    const res = await fetch("/api/drawn-get");
+    if (!res.ok) return [];
+    const { data } = await res.json();
+    return (data && Array.isArray(data)) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveDrawnWinners(winners: Winner[]): Promise<boolean> {
+  try {
+    const res = await fetch("/api/drawn-put", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(winners),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function clearAll(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/clear-all", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
     });
     return res.ok;
   } catch {
@@ -1054,6 +1090,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const [publishedIndices, setPublishedIndices] = useState<Set<number>>(new Set());
   const [prizesLoaded, setPrizesLoaded] = useState(false);
   const [batchesLoaded, setBatchesLoaded] = useState(false);
+  const [winnersLoaded, setWinnersLoaded] = useState(false);
   const isPublished = !!publishedData;
 
   // Load batches on mount
@@ -1089,6 +1126,25 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     }, 500);
     return () => clearTimeout(timer);
   }, [prizes, prizesLoaded]);
+
+  // Load drawn winners on mount
+  useEffect(() => {
+    loadDrawnWinners().then((loadedWinners) => {
+      if (loadedWinners.length > 0) {
+        setWinners(loadedWinners);
+      }
+      setWinnersLoaded(true);
+    });
+  }, []);
+
+  // Save drawn winners when they change (but not during initial load)
+  useEffect(() => {
+    if (!winnersLoaded || !winners) return;
+    const timer = setTimeout(() => {
+      saveDrawnWinners(winners);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [winners, winnersLoaded]);
 
   // Determine published indices from publishedData
   useEffect(() => {
@@ -1171,6 +1227,20 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       const payload: PublishedData = { winners: publishedWinners, drawnAt: new Date().toISOString(), winnerIndices: sortedIndices };
       const ok = await savePublished(payload);
       if (ok) { onPublish(payload); }
+    }
+  };
+
+  const handleReset = async () => {
+    const confirmed = window.confirm("Är du säker? Detta kommer att radera alla priser, ringar, vinnare och publicerade data.");
+    if (!confirmed) return;
+    
+    const ok = await clearAll();
+    if (ok) {
+      setPrizes([{ label: "" }]);
+      setBatches([]);
+      setWinners(null);
+      setPublishedIndices(new Set());
+      onClearPublished();
     }
   };
 
@@ -1366,6 +1436,18 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           Inte tillräckligt många sålda biljetter för att uppfylla det dragantalet.
         </p>
       )}
+
+      <div className="divider" />
+      
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <button
+          className="btn-danger"
+          onClick={handleReset}
+          style={{ fontSize: "0.85rem", padding: "0 16px", height: "36px", fontWeight: 500 }}
+        >
+          🔄 Återställ allt
+        </button>
+      </div>
     </div>
   );
 };
