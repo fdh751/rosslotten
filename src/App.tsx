@@ -387,7 +387,7 @@ function formatDate(iso: string): string {
 
 async function loadPublished(): Promise<PublishedData | null> {
   try {
-    const res = await fetch("/api/winners-get");
+    const res = await fetch("/api/winners-get?t=" + Date.now());
     if (!res.ok) return null;
     const { data } = await res.json();
     return data as PublishedData | null;
@@ -420,7 +420,7 @@ async function clearPublished(): Promise<boolean> {
 
 async function loadPrizes(): Promise<Prize[]> {
   try {
-    const res = await fetch("/api/prizes-get");
+    const res = await fetch("/api/prizes-get?t=" + Date.now());
     if (!res.ok) return [{ label: "" }];
     const { prizes } = await res.json();
     return (prizes && prizes.length > 0) ? prizes : [{ label: "" }];
@@ -444,7 +444,7 @@ async function savePrizes(prizes: Prize[]): Promise<boolean> {
 
 async function loadBatches(): Promise<Batch[]> {
   try {
-    const res = await fetch("/api/batches-get");
+    const res = await fetch("/api/batches-get?t=" + Date.now());
     if (!res.ok) return [];
     const { batches } = await res.json();
     return (batches && batches.length > 0) ? batches : [];
@@ -468,7 +468,7 @@ async function saveBatches(batches: Batch[]): Promise<boolean> {
 
 async function loadDrawnWinners(): Promise<Winner[]> {
   try {
-    const res = await fetch("/api/drawn-get");
+    const res = await fetch("/api/drawn-get?t=" + Date.now());
     if (!res.ok) return [];
     const { data } = await res.json();
     return (data && Array.isArray(data)) ? data : [];
@@ -1157,7 +1157,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
 
   const handleAdd = useCallback(() => {
     const letter = newLetter.trim().toUpperCase();
-    if (!letter || !/^[A-Z]$/.test(letter)) { setAddError("Ange en enda bokstav A–Z."); return; }
+    if (!letter || !/^[A-ZÅÄÖ]$/.test(letter)) { setAddError("Ange en enda bokstav A–Z eller Å, Ä, Ö."); return; }
     if (batches.some((b) => b.letter === letter)) { setAddError(`Ring ${letter} finns redan.`); return; }
     setBatches((prev) => [...prev, { letter, unsoldRaw: newUnsold }]);
     setNewLetter(""); setNewUnsold(""); setAddError("");
