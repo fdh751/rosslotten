@@ -839,7 +839,7 @@ const PublicPage: FC = () => {
       <div className="checker-wrap">
         <div className="checker-box">
           <div className="checker-title">Kontrollera din biljett</div>
-          <div className="checker-desc">Ange batchbokstaven och biljettnummeret tryckt på din biljett.</div>
+          <div className="checker-desc">Ange ditt biljettnummer.</div>
           <div className="checker-row">
             <input
               className="input-letter"
@@ -948,7 +948,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const handleAdd = useCallback(() => {
     const letter = newLetter.trim().toUpperCase();
     if (!letter || !/^[A-Z]$/.test(letter)) { setAddError("Ange en enda bokstav A–Z."); return; }
-    if (batches.some((b) => b.letter === letter)) { setAddError(`Batch ${letter} finns redan.`); return; }
+    if (batches.some((b) => b.letter === letter)) { setAddError(`Ring ${letter} finns redan.`); return; }
     setBatches((prev) => [...prev, { letter, unsoldRaw: newUnsold }]);
     setNewLetter(""); setNewUnsold(""); setAddError("");
     setWinners(null);
@@ -1081,7 +1081,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
         <>
           <div className="stats-bar">
             {[
-              { val: batches.length, label: `Batch${batches.length !== 1 ? "er" : ""}` },
+              { val: batches.length, label: `Ring${batches.length !== 1 ? "er" : ""}` },
               { val: totalSold, label: "Sålda" },
               { val: totalUnsold, label: "Osålda" },
               { val: batches.length * 100, label: "Totalt" },
