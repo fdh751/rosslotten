@@ -266,8 +266,8 @@ const STYLE = `
   .empty-public p { font-size: 0.9rem; }
 
   /* BROADCAST PAGE */
-  .broadcast-app { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-mid) 100%); color: #fff; overflow: hidden; }
-  .broadcast-container { text-align: center; padding: 40px; max-width: 90vw; }
+  .broadcast-app { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-mid) 100%); color: #fff; overflow: hidden; }
+  .broadcast-container { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .broadcast-label { font-size: clamp(1.5rem, 8vw, 3rem); font-weight: 700; margin-bottom: 30px; opacity: 0.9; letter-spacing: 0.02em; }
   .broadcast-ticket { display: flex; flex-direction: column; align-items: center; gap: 30px; animation: fadeUp 0.4s ease; }
   .broadcast-letter { font-size: clamp(2rem, 15vw, 8rem); font-weight: 800; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; }
