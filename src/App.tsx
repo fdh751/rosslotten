@@ -23,6 +23,7 @@ interface PublishedData {
   drawnAt: string;
   winnerIndices?: number[];
   lastPublishedWinner?: Winner;
+  lastPublishedAt?: string;
 }
 
 interface CheckResult {
@@ -1016,10 +1017,10 @@ const BroadcastPage: FC = () => {
   useEffect(() => {
     loadPublished().then(setData);
     
-    // Poll for updates every 2 seconds
+    // Poll for updates every second
     const interval = setInterval(() => {
       loadPublished().then(setData);
-    }, 2000);
+    }, 1000);
     
     return () => clearInterval(interval);
   }, []);
@@ -1050,7 +1051,7 @@ const BroadcastPage: FC = () => {
     <div className="broadcast-app">
       <div className="broadcast-container">
         <div className="broadcast-label">Senaste vinnare</div>
-        <div className="broadcast-ticket">
+        <div className="broadcast-ticket" key={data?.lastPublishedAt}>
           <div className="broadcast-letter">{lastWinner.letter}</div>
           <div className="broadcast-number">{String(lastWinner.number).padStart(3, "0")}</div>
           {lastWinner.prize && <div className="broadcast-prize">🏆 {lastWinner.prize}</div>}
@@ -1197,8 +1198,10 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
 
   const handlePublishRow = async (index: number) => {
     if (!winners) return;
+    const isCurrentlyPublished = publishedIndices.has(index);
+    
     const newPublishedIndices = new Set(publishedIndices);
-    if (newPublishedIndices.has(index)) {
+    if (isCurrentlyPublished) {
       newPublishedIndices.delete(index);
     } else {
       newPublishedIndices.add(index);
@@ -1213,9 +1216,15 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       await clearPublished();
       onClearPublished();
     } else {
-      // Track the winner that was just toggled
-      const currentWinner = winners[index];
-      const payload: PublishedData = { winners: publishedWinners, drawnAt: new Date().toISOString(), winnerIndices: sortedIndices, lastPublishedWinner: currentWinner };
+      // Track the winner only if we're publishing (not unpublishing)
+      const currentWinner = !isCurrentlyPublished ? winners[index] : undefined;
+      const payload: PublishedData = { 
+        winners: publishedWinners, 
+        drawnAt: new Date().toISOString(), 
+        winnerIndices: sortedIndices,
+        lastPublishedWinner: currentWinner,
+        lastPublishedAt: new Date().toISOString()
+      };
       const ok = await savePublished(payload);
       if (ok) { onPublish(payload); }
     }
