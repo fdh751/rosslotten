@@ -917,24 +917,25 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const [winners, setWinners] = useState<Winner[] | null>(null);
   const [winnerSet, setWinnerSet] = useState<Map<string, Set<number>> | null>(null);
   const [publishedIndices, setPublishedIndices] = useState<Set<number>>(new Set());
-  const [prizesSynced, setPrizesSynced] = useState(true);
+  const [prizesLoaded, setPrizesLoaded] = useState(false);
   const isPublished = !!publishedData;
 
   // Load prizes on mount
   useEffect(() => {
     loadPrizes().then((loadedPrizes) => {
       setPrizes(loadedPrizes);
+      setPrizesLoaded(true);
     });
   }, []);
 
-  // Save prizes when they change
+  // Save prizes when they change (but not during initial load)
   useEffect(() => {
-    if (!prizesSynced) return;
+    if (!prizesLoaded) return;
     const timer = setTimeout(() => {
       savePrizes(prizes);
     }, 500);
     return () => clearTimeout(timer);
-  }, [prizes, prizesSynced]);
+  }, [prizes, prizesLoaded]);
 
   // Determine published indices from publishedData
   useEffect(() => {
@@ -976,18 +977,10 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     setWinners(null); setWinnerSet(null);
   };
 
-  const addPrize = () => {
-    setPrizesSynced(true);
-    setPrizes((p) => [...p, { label: "" }]);
-  };
-  const removePrize = (i: number) => {
-    setPrizesSynced(true);
-    setPrizes((p) => p.filter((_, j) => j !== i));
-  };
-  const updatePrize = (i: number, val: string) => {
-    setPrizesSynced(true);
+  const addPrize = () => setPrizes((p) => [...p, { label: "" }]);
+  const removePrize = (i: number) => setPrizes((p) => p.filter((_, j) => j !== i));
+  const updatePrize = (i: number, val: string) =>
     setPrizes((p) => p.map((x, j) => (j === i ? { label: val } : x)));
-  };
 
   const handleDraw = async () => {
     // Clear any previously published results before drawing new ones
