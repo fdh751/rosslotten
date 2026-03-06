@@ -422,6 +422,30 @@ async function clearPublished(): Promise<boolean> {
   }
 }
 
+async function loadPrizes(): Promise<Prize[]> {
+  try {
+    const res = await fetch("/api/prizes-get");
+    if (!res.ok) return [{ label: "" }];
+    const { prizes } = await res.json();
+    return (prizes && prizes.length > 0) ? prizes : [{ label: "" }];
+  } catch {
+    return [{ label: "" }];
+  }
+}
+
+async function savePrizes(prizes: Prize[]): Promise<boolean> {
+  try {
+    const res = await fetch("/api/prizes-put", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(prizes),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 // ─── Authentication helpers ───────────────────────────────────────────────────
 
 async function checkAuthRequired(): Promise<boolean> {
@@ -893,7 +917,24 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const [winners, setWinners] = useState<Winner[] | null>(null);
   const [winnerSet, setWinnerSet] = useState<Map<string, Set<number>> | null>(null);
   const [publishedIndices, setPublishedIndices] = useState<Set<number>>(new Set());
+  const [prizesSynced, setPrizesSynced] = useState(true);
   const isPublished = !!publishedData;
+
+  // Load prizes on mount
+  useEffect(() => {
+    loadPrizes().then((loadedPrizes) => {
+      setPrizes(loadedPrizes);
+    });
+  }, []);
+
+  // Save prizes when they change
+  useEffect(() => {
+    if (!prizesSynced) return;
+    const timer = setTimeout(() => {
+      savePrizes(prizes);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [prizes, prizesSynced]);
 
   // Determine published indices from publishedData
   useEffect(() => {
@@ -935,10 +976,18 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     setWinners(null); setWinnerSet(null);
   };
 
-  const addPrize = () => setPrizes((p) => [...p, { label: "" }]);
-  const removePrize = (i: number) => setPrizes((p) => p.filter((_, j) => j !== i));
-  const updatePrize = (i: number, val: string) =>
+  const addPrize = () => {
+    setPrizesSynced(true);
+    setPrizes((p) => [...p, { label: "" }]);
+  };
+  const removePrize = (i: number) => {
+    setPrizesSynced(true);
+    setPrizes((p) => p.filter((_, j) => j !== i));
+  };
+  const updatePrize = (i: number, val: string) => {
+    setPrizesSynced(true);
     setPrizes((p) => p.map((x, j) => (j === i ? { label: val } : x)));
+  };
 
   const handleDraw = async () => {
     // Clear any previously published results before drawing new ones
