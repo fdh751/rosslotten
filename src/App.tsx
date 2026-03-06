@@ -490,18 +490,6 @@ async function saveDrawnWinners(winners: Winner[]): Promise<boolean> {
   }
 }
 
-async function clearAll(): Promise<boolean> {
-  try {
-    const res = await fetch("/api/clear-all", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
 function generateWinnersPDF(winners: Winner[], drawnAt: string): void {
   const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -1230,20 +1218,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     }
   };
 
-  const handleReset = async () => {
-    const confirmed = window.confirm("Är du säker? Detta kommer att radera alla priser, ringar, vinnare och publicerade data.");
-    if (!confirmed) return;
-    
-    const ok = await clearAll();
-    if (ok) {
-      setPrizes([{ label: "" }]);
-      setBatches([]);
-      setWinners(null);
-      setPublishedIndices(new Set());
-      onClearPublished();
-    }
-  };
-
   return (
     <div className="app">
       <header className="header">
@@ -1436,18 +1410,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
           Inte tillräckligt många sålda biljetter för att uppfylla det dragantalet.
         </p>
       )}
-
-      <div className="divider" />
-      
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <button
-          className="btn-danger"
-          onClick={handleReset}
-          style={{ fontSize: "0.85rem", padding: "0 16px", height: "36px", fontWeight: 500 }}
-        >
-          🔄 Återställ allt
-        </button>
-      </div>
     </div>
   );
 };
