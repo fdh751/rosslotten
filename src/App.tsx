@@ -445,6 +445,30 @@ async function savePrizes(prizes: Prize[]): Promise<boolean> {
   }
 }
 
+async function loadBatches(): Promise<Batch[]> {
+  try {
+    const res = await fetch("/api/batches-get");
+    if (!res.ok) return [];
+    const { batches } = await res.json();
+    return (batches && batches.length > 0) ? batches : [];
+  } catch {
+    return [];
+  }
+}
+
+async function saveBatches(batches: Batch[]): Promise<boolean> {
+  try {
+    const res = await fetch("/api/batches-put", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(batches),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 function generateWinnersPDF(winners: Winner[], drawnAt: string): void {
   const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -1032,7 +1056,25 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const [winners, setWinners] = useState<Winner[] | null>(null);
   const [publishedIndices, setPublishedIndices] = useState<Set<number>>(new Set());
   const [prizesLoaded, setPrizesLoaded] = useState(false);
+  const [batchesLoaded, setBatchesLoaded] = useState(false);
   const isPublished = !!publishedData;
+
+  // Load batches on mount
+  useEffect(() => {
+    loadBatches().then((loadedBatches) => {
+      setBatches(loadedBatches);
+      setBatchesLoaded(true);
+    });
+  }, []);
+
+  // Save batches when they change (but not during initial load)
+  useEffect(() => {
+    if (!batchesLoaded) return;
+    const timer = setTimeout(() => {
+      saveBatches(batches);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [batches, batchesLoaded]);
 
   // Load prizes on mount
   useEffect(() => {
