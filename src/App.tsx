@@ -1125,7 +1125,7 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
 
       <div className="divider" />
 
-      <div className="section-label">Dra vinnare</div>
+      <div className="section-label">Dra vinnarlotter</div>
       <div className="draw-controls">
         <input
           type="number"
