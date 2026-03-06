@@ -77,11 +77,6 @@ const STYLE = `
     from { opacity: 0; transform: scale(0.85); }
     to   { opacity: 1; transform: scale(1); }
   }
-  @keyframes winnerPop {
-    from { transform: scale(0.4); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
-  }
-
   /* TOPNAV */
   .topnav {
     display: flex; align-items: center; justify-content: space-between;
@@ -183,13 +178,6 @@ const STYLE = `
   .input-text-sm::placeholder { color: var(--text-3); font-family: 'DM Sans', sans-serif; font-size: 0.78rem; }
 
   /* TICKET GRID */
-  .ticket-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2.5px; }
-  .ticket { aspect-ratio: 1; border-radius: 3px; transition: all 0.12s; position: relative; cursor: default; }
-  .ticket:hover::after { content: attr(data-n); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; font-size: 0.62rem; font-family: 'DM Mono', monospace; padding: 2px 5px; border-radius: 4px; white-space: nowrap; pointer-events: none; z-index: 10; }
-  .ticket-sold { background: var(--surface-2); }
-  .ticket-unsold { background: var(--border); opacity: 0.4; }
-  .ticket-winner { background: var(--accent) !important; opacity: 1 !important; box-shadow: 0 0 0 2px var(--accent-mid); animation: winnerPop 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
-
   /* DIVIDER */
   .divider { height: 1.5px; background: var(--border); margin: 40px 0; }
 
@@ -915,7 +903,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
   const [drawCount, setDrawCount] = useState(10);
   const [prizes, setPrizes] = useState<Prize[]>([{ label: "" }]);
   const [winners, setWinners] = useState<Winner[] | null>(null);
-  const [winnerSet, setWinnerSet] = useState<Map<string, Set<number>> | null>(null);
   const [publishedIndices, setPublishedIndices] = useState<Set<number>>(new Set());
   const [prizesLoaded, setPrizesLoaded] = useState(false);
   const isPublished = !!publishedData;
@@ -964,17 +951,17 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     if (batches.some((b) => b.letter === letter)) { setAddError(`Batch ${letter} finns redan.`); return; }
     setBatches((prev) => [...prev, { letter, unsoldRaw: newUnsold }]);
     setNewLetter(""); setNewUnsold(""); setAddError("");
-    setWinners(null); setWinnerSet(null);
+    setWinners(null);
   }, [newLetter, newUnsold, batches]);
 
   const handleRemove = (letter: string) => {
     setBatches((prev) => prev.filter((b) => b.letter !== letter));
-    setWinners(null); setWinnerSet(null);
+    setWinners(null);
   };
 
   const handleUnsoldChange = (letter: string, val: string) => {
     setBatches((prev) => prev.map((b) => (b.letter === letter ? { ...b, unsoldRaw: val } : b)));
-    setWinners(null); setWinnerSet(null);
+    setWinners(null);
   };
 
   const addPrize = () => setPrizes((p) => [...p, { label: "" }]);
@@ -995,12 +982,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
     }));
     setWinners(resultWithPrizes);
     setPublishedIndices(new Set());
-    const map = new Map<string, Set<number>>();
-    result.forEach((w) => {
-      if (!map.has(w.letter)) map.set(w.letter, new Set());
-      map.get(w.letter)!.add(w.number);
-    });
-    setWinnerSet(map);
   };
 
   const handlePublishRow = async (index: number) => {
@@ -1116,7 +1097,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
             {batches.map((b) => {
               const unsoldSet = parseUnsold(b.unsoldRaw);
               const soldList = getSold(unsoldSet);
-              const wSet = winnerSet?.get(b.letter) ?? new Set<number>();
               return (
                 <div className="batch-card" key={b.letter}>
                   <div className="batch-card-header">
@@ -1136,20 +1116,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
                     placeholder="t.ex. 3, 15–20, 45"
                     onChange={(e: ChangeEvent<HTMLInputElement>) => handleUnsoldChange(b.letter, e.target.value)}
                   />
-                  <div className="ticket-grid">
-                    {Array.from({ length: 100 }, (_, i) => i + 1).map((n) => {
-                      const unsold = unsoldSet.has(n);
-                      const winner = wSet.has(n);
-                      return (
-                        <div
-                          key={n}
-                          data-n={n}
-                          className={`ticket ${unsold ? "ticket-unsold" : "ticket-sold"} ${winner ? "ticket-winner" : ""}`}
-                          style={winner ? { animationDelay: `${(n % 15) * 0.03}s` } : {}}
-                        />
-                      );
-                    })}
-                  </div>
                 </div>
               );
             })}
