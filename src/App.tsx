@@ -1394,7 +1394,7 @@ const App: FC = () => {
   return (
     <>
       <style>{STYLE}</style>
-      {(page === "admin" || page === "broadcast") && (
+      {page === "admin" && (
         <TopNav 
           page={page} 
           hasPublished={!!publishedData} 
