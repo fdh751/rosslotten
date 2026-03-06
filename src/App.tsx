@@ -22,6 +22,7 @@ interface PublishedData {
   winners: Winner[];
   drawnAt: string;
   winnerIndices?: number[];
+  lastPublishedWinner?: Winner;
 }
 
 interface CheckResult {
@@ -1023,7 +1024,7 @@ const BroadcastPage: FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const lastWinner = data?.winners[data.winners.length - 1];
+  const lastWinner = data?.lastPublishedWinner || data?.winners[data?.winners.length - 1];
 
   if (data === undefined) {
     return (
@@ -1212,7 +1213,9 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       await clearPublished();
       onClearPublished();
     } else {
-      const payload: PublishedData = { winners: publishedWinners, drawnAt: new Date().toISOString(), winnerIndices: sortedIndices };
+      // Track the winner that was just toggled
+      const currentWinner = winners[index];
+      const payload: PublishedData = { winners: publishedWinners, drawnAt: new Date().toISOString(), winnerIndices: sortedIndices, lastPublishedWinner: currentWinner };
       const ok = await savePublished(payload);
       if (ok) { onPublish(payload); }
     }
