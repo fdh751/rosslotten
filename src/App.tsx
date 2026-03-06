@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, FC, KeyboardEvent, ChangeEvent } from "react";
+import { jsPDF } from "jspdf";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -432,6 +433,64 @@ async function savePrizes(prizes: Prize[]): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+function generateWinnersPDF(winners: Winner[], drawnAt: string): void {
+  const doc = new jsPDF();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let yPos = 20;
+
+  // Title
+  doc.setFontSize(20);
+  doc.text("Vinnande biljetter", pageWidth / 2, yPos);
+  yPos += 12;
+
+  // Date
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  const formattedDate = formatDate(drawnAt) || drawnAt || "";
+  const dateText = "Dragning slutförd " + formattedDate;
+  doc.text(dateText, pageWidth / 2, yPos);
+  yPos += 10;
+
+  // Table header
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "bold");
+
+  const col1 = 20;
+  const col2 = 50;
+  const col3 = 110;
+
+  doc.text("Plats", col1, yPos);
+  doc.text("Biljett", col2, yPos);
+  doc.text("Pris", col3, yPos);
+  yPos += 8;
+
+  // Divider line
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, yPos - 2, pageWidth - 15, yPos - 2);
+  yPos += 2;
+
+  // Table rows
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+
+  winners.forEach((w, i) => {
+    // Check if we need a new page
+    if (yPos > pageHeight - 20) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.text(`${i + 1}.`, col1, yPos);
+    doc.text(`${w.letter}${String(w.number).padStart(3, "0")}`, col2, yPos);
+    doc.text(w.prize || "—", col3, yPos);
+    yPos += 8;
+  });
+
+  doc.save("vinnare.pdf");
 }
 
 // ─── Authentication helpers ───────────────────────────────────────────────────
@@ -1154,6 +1213,15 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
             </div>
             <div className="results-actions">
               <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>Jämn fördelning över ringarna</span>
+              {publishedData && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => generateWinnersPDF(publishedData.winners, publishedData.drawnAt)}
+                  style={{ fontSize: "0.75rem", padding: "4px 8px" }}
+                >
+                  ⬇️ PDF
+                </button>
+              )}
             </div>
           </div>
           <div className="results-body">
