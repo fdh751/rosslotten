@@ -270,11 +270,7 @@ const STYLE = `
   /* BROADCAST PAGE */
   .broadcast-app { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-mid) 100%); color: #fff; overflow: hidden; }
   .broadcast-container { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .broadcast-label { font-size: clamp(1.5rem, 8vw, 3rem); font-weight: 700; margin-bottom: 30px; opacity: 0.9; letter-spacing: 0.02em; }
-  .broadcast-ticket { display: flex; flex-direction: column; align-items: center; gap: 30px; animation: fadeUp 0.4s ease; }
-  .broadcast-letter { font-size: clamp(2rem, 15vw, 8rem); font-weight: 800; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; }
-  .broadcast-number { font-size: clamp(2.5rem, 20vw, 12rem); font-weight: 800; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; }
-  .broadcast-prize { font-size: clamp(1rem, 5vw, 2.5rem); font-weight: 600; margin-top: 30px; opacity: 0.95; }
+  .broadcast-ticket { font-size: clamp(4rem, 40vw, 20rem); font-weight: 800; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; animation: fadeUp 0.4s ease; }
   .broadcast-empty { font-size: clamp(1.5rem, 8vw, 3rem); opacity: 0.8; }
 
   /* LOGIN PAGE */
@@ -1050,11 +1046,8 @@ const BroadcastPage: FC = () => {
   return (
     <div className="broadcast-app">
       <div className="broadcast-container">
-        <div className="broadcast-label">Senaste vinnare</div>
         <div className="broadcast-ticket" key={data?.lastPublishedAt}>
-          <div className="broadcast-letter">{lastWinner.letter}</div>
-          <div className="broadcast-number">{String(lastWinner.number).padStart(3, "0")}</div>
-          {lastWinner.prize && <div className="broadcast-prize">🏆 {lastWinner.prize}</div>}
+          {lastWinner.letter}{String(lastWinner.number).padStart(3, "0")}
         </div>
       </div>
     </div>
