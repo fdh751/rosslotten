@@ -993,6 +993,39 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
         <p className="header-desc">Ange varje rings osålda lotter, dra vinnare och publicera sedan resultaten.</p>
       </header>
 
+      <div className="section-label">
+        Priser{" "}
+        <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-3)", fontSize: "0.75rem" }}>
+          — lägg till en prisbeskrivning (valfritt)
+        </span>
+      </div>
+      <div className="prizes-section">
+        <div className="prize-rows">
+          {prizes.map((p, i) => (
+            <div className="prize-row" key={i}>
+              <div className="prize-rank"><span>#{i + 1}</span></div>
+              <input
+                className="input-prize"
+                value={p.label}
+                placeholder={i === 0 ? "1:a pris — Weekendgiveaway" : i === 1 ? "2:a pris — €500 gavokort" : `Pris #${i + 1}`}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => updatePrize(i, e.target.value)}
+              />
+              {prizes.length > 1 && (
+                <button className="btn-remove-prize" onClick={() => removePrize(i)}>×</button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button className="btn-add-prize" onClick={addPrize}>
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+            <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+          Lägg till beskrivning
+        </button>
+      </div>
+
+      <div className="divider" />
+
       <div className="section-label">Lägg till en ring</div>
       <div className="add-row">
         <input
@@ -1083,37 +1116,6 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
       )}
 
       <div className="divider" />
-
-      <div className="section-label">
-        Priser{" "}
-        <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "var(--text-3)", fontSize: "0.75rem" }}>
-          — lägg till en prisbeskrivning (valfritt)
-        </span>
-      </div>
-      <div className="prizes-section">
-        <div className="prize-rows">
-          {prizes.map((p, i) => (
-            <div className="prize-row" key={i}>
-              <div className="prize-rank"><span>#{i + 1}</span></div>
-              <input
-                className="input-prize"
-                value={p.label}
-                placeholder={i === 0 ? "1:a pris — Weekendgiveaway" : i === 1 ? "2:a pris — €500 gavokort" : `Pris #${i + 1}`}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => updatePrize(i, e.target.value)}
-              />
-              {prizes.length > 1 && (
-                <button className="btn-remove-prize" onClick={() => removePrize(i)}>×</button>
-              )}
-            </div>
-          ))}
-        </div>
-        <button className="btn-add-prize" onClick={addPrize}>
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-            <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
-          Lägg till beskrivning
-        </button>
-      </div>
 
       <div className="section-label">Dra vinnare</div>
       <div className="draw-controls">
