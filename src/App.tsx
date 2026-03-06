@@ -964,12 +964,31 @@ const PublicPage: FC = () => {
 
 // ─── Broadcast Page ───────────────────────────────────────────────────────────
 
-interface BroadcastPageProps {
-  publishedData: PublishedData | null | undefined;
-}
+const BroadcastPage: FC = () => {
+  const [data, setData] = useState<PublishedData | null | undefined>(undefined);
 
-const BroadcastPage: FC<BroadcastPageProps> = ({ publishedData }) => {
-  const lastWinner = publishedData?.winners[publishedData.winners.length - 1];
+  useEffect(() => {
+    loadPublished().then(setData);
+    
+    // Poll for updates every 2 seconds
+    const interval = setInterval(() => {
+      loadPublished().then(setData);
+    }, 2000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const lastWinner = data?.winners[data.winners.length - 1];
+
+  if (data === undefined) {
+    return (
+      <div className="broadcast-app">
+        <div className="broadcast-container">
+          <div className="broadcast-empty">Laddar…</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!lastWinner) {
     return (
@@ -1386,7 +1405,7 @@ const App: FC = () => {
       {page === "results" ? (
         <PublicPage />
       ) : page === "broadcast" ? (
-        <BroadcastPage publishedData={publishedData} />
+        <BroadcastPage />
       ) : (
         <AdminPage
           publishedData={publishedData}
