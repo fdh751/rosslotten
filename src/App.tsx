@@ -474,7 +474,7 @@ function generateWinnersPDF(winners: Winner[], drawnAt: string): void {
 
   // Title
   doc.setFontSize(20);
-  doc.text("Vinnande biljetter", pageWidth / 2, yPos);
+  doc.text("Vinnande lotter", pageWidth / 2, yPos);
   yPos += 12;
 
   // Date
@@ -495,7 +495,7 @@ function generateWinnersPDF(winners: Winner[], drawnAt: string): void {
   const col3 = 110;
 
   doc.text("Plats", col1, yPos);
-  doc.text("Biljett", col2, yPos);
+  doc.text("Lott", col2, yPos);
   doc.text("Pris", col3, yPos);
   yPos += 8;
 
@@ -907,8 +907,8 @@ const PublicPage: FC = () => {
     <div className="public-app">
       <div className="public-header">
         <div className="header-tag" style={{ margin: "0 auto 20px" }}>Officiella resultat</div>
-        <h1>Vinnande biljetter</h1>
-        <p>Kontrollera nedan för att se om din biljett är en vinnare.</p>
+        <h1>Vinnande lotter</h1>
+        <p>Kontrollera nedan för att se om din lott är en vinnare.</p>
         {data.drawnAt && <div className="drawn-at">Dragning slutförd {formatDate(data.drawnAt)}</div>}
       </div>
 
@@ -934,8 +934,8 @@ const PublicPage: FC = () => {
 
       <div className="checker-wrap">
         <div className="checker-box">
-          <div className="checker-title">Kontrollera din biljett</div>
-          <div className="checker-desc">Ange ditt biljettnummer.</div>
+          <div className="checker-title">Kontrollera din lott</div>
+          <div className="checker-desc">Ange ditt lottnummer.</div>
           <div className="checker-row">
             <input
               className="input-letter"
@@ -969,11 +969,11 @@ const PublicPage: FC = () => {
             <div className={`checker-result ${checkResult.win ? "win" : "no-win"}`}>
               {checkResult.win ? (
                 <>
-                  🎉 <span className="pos-label">Grattis!</span> Din biljett är vinnare #{checkResult.position}.
+                  🎉 <span className="pos-label">Grattis!</span> Din lott är en vinnare #{checkResult.position}.
                   {checkResult.prize && <> — <strong>{checkResult.prize}</strong></>}
                 </>
               ) : (
-                <>Din biljett drogs inte denna gång. Lycka till nästa gång!</>
+                <>Din lott drogs inte denna gång. Lycka till nästa gång!</>
               )}
             </div>
           )}
