@@ -268,6 +268,16 @@ const STYLE = `
   .empty-public h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text-2); margin-bottom: 8px; }
   .empty-public p { font-size: 0.9rem; }
 
+  /* BROADCAST PAGE */
+  .broadcast-app { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-mid) 100%); color: #fff; overflow: hidden; }
+  .broadcast-container { text-align: center; padding: 40px; max-width: 90vw; }
+  .broadcast-label { font-size: clamp(1.5rem, 8vw, 3rem); font-weight: 700; margin-bottom: 30px; opacity: 0.9; letter-spacing: 0.02em; }
+  .broadcast-ticket { display: flex; flex-direction: column; align-items: center; gap: 30px; animation: fadeUp 0.4s ease; }
+  .broadcast-letter { font-size: clamp(2rem, 15vw, 8rem); font-weight: 800; font-family: 'DM Mono', monospace; letter-spacing: 0.1em; }
+  .broadcast-number { font-size: clamp(2.5rem, 20vw, 12rem); font-weight: 800; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; }
+  .broadcast-prize { font-size: clamp(1rem, 5vw, 2.5rem); font-weight: 600; margin-top: 30px; opacity: 0.95; }
+  .broadcast-empty { font-size: clamp(1.5rem, 8vw, 3rem); opacity: 0.8; }
+
   /* LOGIN PAGE */
   .login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; background: var(--bg); }
   .login-box { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 40px; max-width: 400px; width: 100%; animation: fadeUp 0.3s ease; }
@@ -756,7 +766,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onClose, requiresCurrentPasswor
 // ─── TopNav ───────────────────────────────────────────────────────────────────
 
 interface TopNavProps {
-  page: "admin" | "results";
+  page: "admin" | "results" | "broadcast";
   hasPublished: boolean;
   onUnpublish?: () => void;
   onSettings?: () => void;
@@ -781,6 +791,12 @@ const TopNav: FC<TopNavProps> = ({ page, hasPublished, onUnpublish, onSettings }
         </svg>
         Resultat
         {hasPublished && <span className="nav-badge">Live</span>}
+      </a>
+      <a className={`nav-link${page === "broadcast" ? " active" : ""}`} href="#broadcast">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M1.5 3.5L1.5 11.5M11.5 3.5L11.5 11.5M1.5 3.5L4 1.5L4 5.5M11.5 3.5L9 1.5L9 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Visning
       </a>
       {onSettings && (
         <button
@@ -940,6 +956,39 @@ const PublicPage: FC = () => {
               )}
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Broadcast Page ───────────────────────────────────────────────────────────
+
+interface BroadcastPageProps {
+  publishedData: PublishedData | null | undefined;
+}
+
+const BroadcastPage: FC<BroadcastPageProps> = ({ publishedData }) => {
+  const lastWinner = publishedData?.winners[publishedData.winners.length - 1];
+
+  if (!lastWinner) {
+    return (
+      <div className="broadcast-app">
+        <div className="broadcast-container">
+          <div className="broadcast-empty">Inga vinnare ännu</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="broadcast-app">
+      <div className="broadcast-container">
+        <div className="broadcast-label">Senaste vinnare</div>
+        <div className="broadcast-ticket">
+          <div className="broadcast-letter">{lastWinner.letter}</div>
+          <div className="broadcast-number">{String(lastWinner.number).padStart(3, "0")}</div>
+          {lastWinner.prize && <div className="broadcast-prize">🏆 {lastWinner.prize}</div>}
         </div>
       </div>
     </div>
@@ -1295,7 +1344,10 @@ const App: FC = () => {
     loadPublished().then(setPublishedData);
   }, []);
 
-  const page: "admin" | "results" = hash === "#results" ? "results" : "admin";
+  const page: "admin" | "results" | "broadcast" = 
+    hash === "#results" ? "results" : 
+    hash === "#broadcast" ? "broadcast" : 
+    "admin";
 
   // If auth is still loading, show nothing
   if (authRequired === null) {
@@ -1323,7 +1375,7 @@ const App: FC = () => {
   return (
     <>
       <style>{STYLE}</style>
-      {page === "admin" && (
+      {(page === "admin" || page === "broadcast") && (
         <TopNav 
           page={page} 
           hasPublished={!!publishedData} 
@@ -1333,6 +1385,8 @@ const App: FC = () => {
       )}
       {page === "results" ? (
         <PublicPage />
+      ) : page === "broadcast" ? (
+        <BroadcastPage publishedData={publishedData} />
       ) : (
         <AdminPage
           publishedData={publishedData}
