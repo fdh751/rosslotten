@@ -1213,10 +1213,10 @@ const AdminPage: FC<AdminPageProps> = ({ publishedData, onPublish, onClearPublis
             </div>
             <div className="results-actions">
               <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>Jämn fördelning över ringarna</span>
-              {publishedData && (
+              {winners && winners.length > 0 && (
                 <button
                   className="btn btn-primary"
-                  onClick={() => generateWinnersPDF(publishedData.winners, publishedData.drawnAt)}
+                  onClick={() => generateWinnersPDF(winners, new Date().toISOString())}
                   style={{ fontSize: "0.75rem", padding: "4px 8px" }}
                 >
                   ⬇️ PDF
