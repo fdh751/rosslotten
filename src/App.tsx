@@ -240,10 +240,10 @@ const STYLE = `
   .public-header p { color: var(--text-2); font-size: 0.95rem; font-weight: 300; }
   .drawn-at { font-size: 0.75rem; color: var(--text-3); margin-top: 6px; font-family: 'DM Mono', monospace; }
 
-  .public-winners { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 40px; }
-  .public-winner-row { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 20px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); animation: fadeUp 0.3s ease both; text-align: center; }
+  .public-winners { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+  .public-winner-row { display: flex; flex-direction: row; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); animation: fadeUp 0.3s ease both; }
   .public-winner-row:last-child { border: 1.5px solid var(--border); }
-  .public-pos { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--text-3); text-align: center; }
+  .public-pos { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--text-3); width: 32px; flex-shrink: 0; text-align: right; }
   .public-chip { display: flex; border-radius: 8px; overflow: hidden; border: 1.5px solid var(--accent-mid); font-family: 'DM Mono', monospace; flex-shrink: 0; }
   .public-chip-letter { background: var(--accent); color: #fff; font-size: 0.92rem; font-weight: 500; padding: 7px 12px; }
   .public-chip-num { background: var(--accent-light); color: var(--accent); font-size: 0.92rem; font-weight: 500; padding: 7px 13px; }
